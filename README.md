@@ -1,7 +1,7 @@
 # Netdiscover-for-Windows
 Similar tool like netdiscover just built for windows using python.
 
-Usage  : python3 netdiscover.py <target_subnet>
+*Usage  :* python3 netdiscover.py <target_subnet>
 
 Example: netdiscover.py 192.168.0.0/24
 
