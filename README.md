@@ -17,8 +17,7 @@ pip install requests
 
 ![1](https://github.com/user-attachments/assets/5e5925d1-7454-41cd-9536-639575cd8fe8)
 
-**Usage  :** python3 netdiscover.py <target_subnet>
+5. Below is SS of how output looks
 
-**Example:** netdiscover.py 192.168.0.0/24
 
-![2](https://github.com/user-attachments/assets/860407c7-f341-44b8-b054-cdeecb7fdb11)
+![2](https://github.com/user-attachments/assets/d5c7df57-b922-4ce1-9277-8d5e12645f19)
