@@ -13,7 +13,7 @@ pip install scapy
 ```markdown
 pip install requests
 ```
-4. install psutil via
+4. Install psutil via
 ```markdown
 pip install psutil
 ```
