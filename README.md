@@ -17,7 +17,8 @@ pip install requests
 ```markdown
 pip install psutil
 ```
-5. Download python script netdiscover.py from this repo 
+5. Download python script netdiscover.py & MACVendors.py from this repo 
+6. For Syntax check below SS.
 
 ![syntax](https://github.com/user-attachments/assets/9c2a7bd2-5a13-4f1a-9523-ea399693b06a)
 
