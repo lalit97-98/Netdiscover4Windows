@@ -13,11 +13,16 @@ pip install scapy
 ```markdown
 pip install requests
 ```
-4. Download python script netdiscover.py from this repo 
+4. pip install psutil
+```markdown
+pip install psutil
+```
+5. Download python script netdiscover.py from this repo 
 
-![1](https://github.com/user-attachments/assets/5e5925d1-7454-41cd-9536-639575cd8fe8)
+![syntax](https://github.com/user-attachments/assets/9c2a7bd2-5a13-4f1a-9523-ea399693b06a)
+
 
 5. Below is SS of how output looks
 
+![results](https://github.com/user-attachments/assets/3dec7b0c-66a1-49a0-9c5e-b8f4229e5e63)
 
-![2](https://github.com/user-attachments/assets/d5c7df57-b922-4ce1-9277-8d5e12645f19)
