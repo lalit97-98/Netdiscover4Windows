@@ -1,18 +1,16 @@
 from scapy.all import ARP, Ether, srp
 import sys
-import requests
+import psutil
+import argparse
+import MACVendors  # Import your MACVendors.py file
 
-# Function to fetch the vendor from the MAC address using the macvendors.co API
+# Function to fetch the vendor from the MAC address using the mac_vendors dictionary
 def get_vendor(mac_address):
-    try:
-        # Call macvendors API with the MAC address
-        response = requests.get(f"https://api.macvendors.com/{mac_address}")
-        if response.status_code == 200:
-            return response.text.strip()  # Return the vendor name
-        else:
-            return "Unknown"  # If no vendor found, return "Unknown"
-    except requests.RequestException:
-        return "Unknown"  # Return "Unknown" if the API request fails
+    # Extract the first 6 characters (24-bit prefix) from the MAC address
+    prefix = mac_address.replace(":", "")[:6].upper()
+    
+    # Return the vendor name if found, otherwise "Unknown"
+    return MACVendors.mac_vendors.get(prefix, "Unknown")
 
 # ASCII Art for the script introduction
 def print_ascii_art():
@@ -28,17 +26,35 @@ o888o o888o `Y8bod8P'   "888" `Y8bod88P" o888o 8""888P' `Y8bod8P' `Y8bod8P'     
     """
     print(ascii_art)
 
-def network_discovery(target_ip):
-    print("Starting Network Discovery...")
+# Validate the network interface
+def is_valid_interface(interface):
+    # Get a list of available interfaces
+    interfaces = list_friendly_interfaces()
+    return interface in interfaces
+
+# Function to get human-readable network interfaces using psutil
+def list_friendly_interfaces():
+    # List all interfaces and return them in a user-friendly format
+    interfaces = psutil.net_if_addrs()
+    friendly_interfaces = []
+    
+    for iface in interfaces:
+        # Display only the name of the interface, not the detailed address info
+        friendly_interfaces.append(iface)
+    
+    return friendly_interfaces
+
+def network_discovery(target_ip, iface):
+    print(f"Starting Network Discovery on interface {iface}...")
 
     # Craft the ARP request packet
     arp_request = ARP(pdst=target_ip)
     broadcast = Ether(dst="ff:ff:ff:ff:ff:ff")
     arp_request_broadcast = broadcast/arp_request
 
-    # Send the packet and capture the response
+    # Send the packet and capture the response with a timeout of 5 seconds
     print("Scanning network for devices...")
-    ans, _ = srp(arp_request_broadcast, timeout=2, verbose=True)
+    ans, _ = srp(arp_request_broadcast, timeout=5, verbose=True, iface=iface)  # Use the user-provided interface
 
     # Print headers for the table with the 3rd column: Vendor
     print("\nIP Address\tMAC Address\t\tVendor")
@@ -47,19 +63,41 @@ def network_discovery(target_ip):
     # Iterate through the responses and display IP, MAC, and Vendor
     for sent, received in ans:
         mac_address = received.hwsrc
-        vendor = get_vendor(mac_address)  # Get vendor from MAC address
+        vendor = get_vendor(mac_address)  # Get vendor from MAC address using the MACVendors.py
         print(f"{received.psrc}\t{mac_address}\t{vendor}")
 
 def main():
     print_ascii_art()  # Print ASCII Art at the start of the execution
     
-    if len(sys.argv) != 2:
-        print("\nUsage  : python3 netdiscover.py <target_subnet>" "\n\n\t\t===OR===\n" "\nExample: netdiscover.py 192.168.0.0/24")
+    # Setup argument parser
+    parser = argparse.ArgumentParser(description="Network Discovery Tool")
+    
+    # Add the target subnet and interface arguments
+    parser.add_argument("target_subnet", help="Target subnet to scan (e.g., 192.168.0.0/24)")
+    parser.add_argument("-i", "--interface", required=True, help="Network interface (e.g., eth0, Wi-Fi)")
+    
+    # Parse arguments
+    args = parser.parse_args()
+    
+    # Check if the interface was provided
+    if not args.interface:
+        print("Error: The interface (-i) is required. Please specify the network interface to use.")
+        parser.print_help()
+        sys.exit(1)
+    
+    target_subnet = args.target_subnet
+    iface = args.interface  # Get the network interface from the command-line arguments
+    
+    # Validate the interface
+    if not is_valid_interface(iface):
+        print(f"Error: The interface '{iface}' is not valid. Please provide a valid interface name.")
+        print("\nAvailable interfaces:")
+        friendly_interfaces = list_friendly_interfaces()  # Get user-friendly interface names
+        print(", ".join(friendly_interfaces))  # Print available interfaces in user-friendly format
         input("\nPress Enter to exit...")  # Wait for user input before closing
         sys.exit(1)
     
-    target_subnet = sys.argv[1]
-    network_discovery(target_subnet)
+    network_discovery(target_subnet, iface)
 
     # Add a pause here so that the terminal window stays open after the script finishes
     input("\nPress Enter to exit...")
