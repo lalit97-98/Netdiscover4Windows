@@ -2,17 +2,16 @@ from scapy.all import ARP, Ether, srp
 import sys
 import psutil
 import argparse
-import MACVendors  # Import your MACVendors.py file
+import MACVendors  # Imported MACVendors.py file
 
-# Function to fetch the vendor from the MAC address using the mac_vendors dictionary
+# fetch the vendors from mac_vendors dictionary
 def get_vendor(mac_address):
-    # Extract the first 6 characters (24-bit prefix) from the MAC address
+    # Extracted first 6 characters from MAC address
     prefix = mac_address.replace(":", "")[:6].upper()
     
-    # Return the vendor name if found, otherwise "Unknown"
+    # Returns vendor name when found from dictionary, otherwise returns "Unknown"
     return MACVendors.mac_vendors.get(prefix, "Unknown")
 
-# ASCII Art for the script introduction
 def print_ascii_art():
     ascii_art = """
                           .         .o8   o8o                                                              
@@ -26,20 +25,20 @@ o888o o888o `Y8bod8P'   "888" `Y8bod88P" o888o 8""888P' `Y8bod8P' `Y8bod8P'     
     """
     print(ascii_art)
 
-# Validate the network interface
+# Validates network interface
 def is_valid_interface(interface):
-    # Get a list of available interfaces
+    # Gets list of available interfaces on device
     interfaces = list_friendly_interfaces()
     return interface in interfaces
 
-# Function to get human-readable network interfaces using psutil
+# Function to get readable interfaces using psutil
 def list_friendly_interfaces():
-    # List all interfaces and return them in a user-friendly format
+    # List all interfaces and return in a user-friendly format
     interfaces = psutil.net_if_addrs()
     friendly_interfaces = []
     
     for iface in interfaces:
-        # Display only the name of the interface, not the detailed address info
+        # Displays name of the interface, not the detailed address info
         friendly_interfaces.append(iface)
     
     return friendly_interfaces
@@ -47,16 +46,16 @@ def list_friendly_interfaces():
 def network_discovery(target_ip, iface):
     print(f"Starting Network Discovery on interface {iface}...")
 
-    # Craft the ARP request packet
+    # Crafts ARP request packet
     arp_request = ARP(pdst=target_ip)
     broadcast = Ether(dst="ff:ff:ff:ff:ff:ff")
     arp_request_broadcast = broadcast/arp_request
 
     # Send the packet and capture the response with a timeout of 5 seconds
     print("Scanning network for devices...")
-    ans, _ = srp(arp_request_broadcast, timeout=5, verbose=True, iface=iface)  # Use the user-provided interface
+    ans, _ = srp(arp_request_broadcast, timeout=5, verbose=True, iface=iface)  # Use timeout as you need for fast reduce it.
 
-    # Print headers for the table with the 3rd column: Vendor
+    # Print headers for table
     print("\nIP Address\tMAC Address\t\tVendor")
     print("-----------------------------------------------")
 
@@ -67,7 +66,7 @@ def network_discovery(target_ip, iface):
         print(f"{received.psrc}\t{mac_address}\t{vendor}")
 
 def main():
-    print_ascii_art()  # Print ASCII Art at the start of the execution
+    print_ascii_art()  
     
     # Setup argument parser
     parser = argparse.ArgumentParser(description="Network Discovery Tool")
@@ -86,14 +85,14 @@ def main():
         sys.exit(1)
     
     target_subnet = args.target_subnet
-    iface = args.interface  # Get the network interface from the command-line arguments
+    iface = args.interface  # Gets network interface from the command-line arguments
     
     # Validate the interface
     if not is_valid_interface(iface):
         print(f"Error: The interface '{iface}' is not valid. Please provide a valid interface name.")
         print("\nAvailable interfaces:")
-        friendly_interfaces = list_friendly_interfaces()  # Get user-friendly interface names
-        print(", ".join(friendly_interfaces))  # Print available interfaces in user-friendly format
+        friendly_interfaces = list_friendly_interfaces()  # user-friendly interface names
+        print(", ".join(friendly_interfaces))  # Print available interfaces
         input("\nPress Enter to exit...")  # Wait for user input before closing
         sys.exit(1)
     
